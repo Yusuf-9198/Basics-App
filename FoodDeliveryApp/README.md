@@ -63,8 +63,10 @@ Then:
 **Web (recommended after config changes):**
 
 ```bash
-npx expo start --web -c
+npm run web
 ```
+
+The app opens automatically at **http://localhost:8081** with live reload enabled.
 
 ### Demo login
 
@@ -73,6 +75,14 @@ npx expo start --web -c
 3. Tap **Sign In**
 4. Complete **Onboarding** once (Get Started)
 5. Explore tabs and flows
+
+### Quick start (one command)
+
+```bash
+npm install && npm run web
+```
+
+This installs dependencies and starts the web development server immediately.
 
 ---
 
@@ -196,8 +206,53 @@ npx uri-scheme open khana-khazana://restaurant/123 --ios
 
 ## Screenshots
 
+### Web Access
 
+The app is designed to be responsive and works across all platforms:
 
+- **Web**: `npm run web` → http://localhost:8081
+- **iOS Simulator**: `npx expo start` → Press `i`
+- **Android Emulator**: `npx expo start` → Press `a`
+- **Physical Device**: `npx expo start` → Scan QR code with Expo Go
+
+### Key screens
+
+1. **Login** — Email and password input with mock authentication
+2. **Onboarding** — Single "Get Started" screen shown on first launch
+3. **Home** — Restaurant grid with search and filter capabilities
+4. **Restaurant Detail** — Menu items with pricing and restaurant info
+5. **Cart** — Checkout flow with order summary
+6. **Orders** — Order history and status tracking
+7. **Profile** — User info and drawer navigation menu
+8. **Search** — Search restaurants by name and cuisine type
+9. **Settings** — App configuration and preferences
+10. **Help** — Support and FAQ information
+
+---
+
+## Testing
+
+### Test scenarios
+
+1. **First launch** → Login → Onboarding → Home
+2. **Add to cart** → Cart shows badge on Orders tab
+3. **Deep link while logged out** → Login required first, then navigates to destination
+4. **Drawer navigation** → Accessible from Profile tab
+5. **Logout** → Clears all state and returns to Login
+6. **Search functionality** → Filter restaurants by name/cuisine
+7. **Responsive design** → Works on mobile (Expo Go), tablet, and desktop (web)
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **Metro bundler crashes** | Kill terminal, run `npm run web -c` (clear cache) |
+| **AsyncStorage not working** | Check device storage permissions or browser local storage |
+| **Deep link not working** | Ensure app is signed in and the restaurant id exists in mock data |
+| **Web version not updating** | Refresh browser (Ctrl+F5) or restart with `npm run web -c` |
+| **Package mismatch warning** | Run `npm install` again and restart the bundler |
+
+---
 
 ## Assumptions
 
@@ -211,6 +266,8 @@ npx uri-scheme open khana-khazana://restaurant/123 --ios
 8. **Web** — Supported via `react-native-web`; full-height root layout is applied for correct flex behavior.
 9. **Assignment focus** — Navigation patterns are the primary goal, not production UI or backend integration.
 10. **No real payments** — Checkout is a UI-only flow.
+11. **Persistent state** — Login, onboarding, cart, and orders are persisted in AsyncStorage and survive app restarts.
+12. **Role of Context** — `AuthContext`, `CartContext`, and `OrdersContext` manage global state; no Redux or external state management.
 
 ---
 
