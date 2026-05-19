@@ -3,6 +3,8 @@
 A React Native (Expo) food delivery demo focused on **React Navigation**: nested navigators, route params, conditional auth, deep linking, tab bar visibility, drawer navigation, badges, and programmatic navigation (`navigate`, `goBack`, `replace`, `reset`).
 
 ---
+### demo vedio
+https://www.loom.com/share/15b9933da8db4559b4b0cdcc63e040eb
 
 ## Project overview
 
