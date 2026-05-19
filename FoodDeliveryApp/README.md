@@ -42,8 +42,27 @@ Default demo user: **Ghazi** (`ghazi@yusuf.com`). Any password works for sign-in
 
 ### Prerequisites
 
-- Node.js 18+ (LTS recommended)
-- npm (or yarn / pnpm)
+- **Node.js 18+** (LTS recommended) — [Download](https://nodejs.org/)
+- **npm 9+** (comes with Node.js; verify with `npm -v`)
+- **Git** (for version control)
+- **Windows/Mac/Linux** operating system
+
+### Environment verification
+
+Before starting, verify your setup:
+
+```bash
+# Check Node version (should be 18+)
+node -v
+
+# Check npm version (should be 9+)
+npm -v
+
+# Ensure you're in the FoodDeliveryApp directory
+pwd  # or: cd "path/to/FoodDeliveryApp"
+```
+
+If any command fails, install or update the missing tool.
 
 ### Install and start
 
@@ -83,6 +102,26 @@ npm install && npm run web
 ```
 
 This installs dependencies and starts the web development server immediately.
+
+### Post-installation verification
+
+After `npm install`, verify the setup:
+
+```bash
+# Check that node_modules was created
+ls node_modules/@react-navigation  # Should show multiple folders
+
+# Verify all key dependencies installed
+npm list expo react-native react-navigation
+
+# Check for any TypeScript issues
+npx tsc --noEmit  # Should complete without errors
+
+# Test the dev server
+npm run web  # Should start without errors
+```
+
+If any verification fails, see **Common errors & solutions** section.
 
 ---
 
@@ -230,6 +269,56 @@ The app is designed to be responsive and works across all platforms:
 
 ---
 
+## Setup validation checklist
+
+Before running the app, verify each step:
+
+- [ ] Node.js 18+ installed: `node -v`
+- [ ] npm 9+ installed: `npm -v`
+- [ ] In FoodDeliveryApp directory: `pwd` shows correct path
+- [ ] Dependencies installed: `ls node_modules` shows packages
+- [ ] No TypeScript errors: `npx tsc --noEmit`
+- [ ] App.tsx imports correctly: No module errors
+- [ ] Port 8081 available: `npx kill-port 8081` (if needed)
+- [ ] Browser cache cleared (for web testing)
+
+If any step fails, refer to **Common errors & solutions** above.
+
+---
+
+## Error prevention guide
+
+### During setup
+
+1. **Always run `npm install` after cloning** — Missing dependencies cause cascading errors
+2. **Use the correct directory** — Many errors stem from running commands in the wrong folder
+3. **Check Node version** — Requires Node 18+ for compatibility
+4. **Use `npm install --legacy-peer-deps` if needed** — Avoids peer dependency conflicts
+
+### During development
+
+1. **Clear cache when making config changes** — Use `npm run web -c` (includes `-c` flag)
+2. **Hard-refresh browser after changes** — Ctrl+Shift+R (not just Ctrl+R)
+3. **Restart Metro bundler** — Kill terminal (Ctrl+C) and restart if you see Metro errors
+4. **Check file imports** — Typos in import paths cause "Cannot find module" errors
+5. **Verify AsyncStorage setup** — Required for login persistence; test with browser DevTools
+
+### During testing
+
+1. **Validate deep links** — Test with mock data ids first (e.g., `123`, `124`)
+2. **Check app state** — Use React DevTools or browser console to inspect state
+3. **Test all platforms** — Web, iOS, and Android may behave differently
+4. **Clear app data between tests** — Logout to reset state, or clear AsyncStorage
+
+### Deployment preparation
+
+1. **Run TypeScript check** — `npx tsc --noEmit`
+2. **Test deep linking on all platforms** — Schemes must be identical
+3. **Verify all environment paths** — No hardcoded absolute paths
+4. **Review console warnings** — Fix deprecation warnings before production
+
+---
+
 ## Testing
 
 ### Test scenarios
@@ -244,13 +333,44 @@ The app is designed to be responsive and works across all platforms:
 
 ### Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| **Metro bundler crashes** | Kill terminal, run `npm run web -c` (clear cache) |
-| **AsyncStorage not working** | Check device storage permissions or browser local storage |
-| **Deep link not working** | Ensure app is signed in and the restaurant id exists in mock data |
-| **Web version not updating** | Refresh browser (Ctrl+F5) or restart with `npm run web -c` |
-| **Package mismatch warning** | Run `npm install` again and restart the bundler |
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `'expo' is not recognized` | npm packages not installed | Run `npm install` in the project directory |
+| `Cannot find module '@expo/vector-icons'` | Incomplete dependency installation | Run `npm install` or `npm install --legacy-peer-deps` |
+| `Metro bundler crashes` | Cache corruption or out-of-date build | Kill terminal (Ctrl+C), then run `npm run web -c` |
+| `AsyncStorage returns null` | Local storage cleared or device permissions denied | On web: Check browser local storage; On mobile: Check app permissions |
+| `Deep link not working` | Restaurant id doesn't exist or user not signed in | Verify id matches mock data (e.g., `123` for Spice Garden); ensure you're logged in |
+| `Web version not updating after changes` | Browser cache or Metro cache issue | Hard refresh (Ctrl+Shift+R) or restart with `npm run web -c` |
+| `Port 8081 already in use` | Another process using the port | Kill the process: `npx kill-port 8081` or change port with `npx expo start --web --port 3000` |
+| `TypeError: Cannot read property 'navigate'` | Navigation ref not initialized | Ensure `navigationRef` is properly connected in `RootNavigator` |
+| `Package.json errors after npm install` | Dependency version conflicts | Run `npm install --legacy-peer-deps` or `npm audit fix` |
+| `ENOENT: no such file or directory` | Running npm command from wrong directory | Verify current directory with `pwd`, navigate to FoodDeliveryApp folder |
+
+### Common errors & solutions
+
+**Error 1: Module not found after `npm install`**
+```
+Module not found: Can't resolve '@react-navigation/native'
+```
+**Fix:** Run `npm install` again or use `npm install --legacy-peer-deps`
+
+**Error 2: Build fails on web**
+```
+TypeError: Cannot find module './src/navigation/linking'
+```
+**Fix:** Ensure all imports use correct relative paths; check TypeScript compilation
+
+**Error 3: AsyncStorage warnings in console**
+```
+Warning: AsyncStorage has been extracted from react-native core
+```
+**Fix:** This is informational; ensure `@react-native-async-storage/async-storage` is installed
+
+**Error 4: Routing loops or infinite navigation**
+```
+Navigation state keeps resetting
+```
+**Fix:** Check deep linking configuration in `linking.ts`; avoid circular route references
 
 ---
 
@@ -268,6 +388,71 @@ The app is designed to be responsive and works across all platforms:
 10. **No real payments** — Checkout is a UI-only flow.
 11. **Persistent state** — Login, onboarding, cart, and orders are persisted in AsyncStorage and survive app restarts.
 12. **Role of Context** — `AuthContext`, `CartContext`, and `OrdersContext` manage global state; no Redux or external state management.
+
+---
+
+## Known limitations & workarounds
+
+| Limitation | Impact | Workaround |
+|-----------|--------|-----------|
+| Mock data only | No real restaurant data | Add Firebase/backend integration for production |
+| LocalStorage only | Data lost if app is cleared | Implement cloud sync for persistence |
+| No payment processing | Checkout is UI-only | Integrate Stripe/PayPal for real transactions |
+| Limited error handling | App may crash on unexpected input | Add try-catch blocks and error boundaries |
+| No notification system | Users don't get order updates | Add push notifications with Expo Notifications |
+| Single user context | No multi-user support | Extend AuthContext for multiple accounts |
+| No offline mode | App requires internet | Implement offline caching with Redux Persist |
+| Web performance | Large bundles on slow networks | Implement code splitting and lazy loading |
+
+---
+
+## Support & debug resources
+
+### Debug tools
+
+- **VS Code Debugger** — Debug TypeScript with breakpoints and step-through
+- **React DevTools** — Inspect component hierarchy and state
+- **Expo DevTools** — Built into Metro; access via terminal commands
+- **Browser DevTools** (Web) — Console, Network, Local Storage tabs
+- **Android/iOS DevTools** — Platform-specific debugging with Xcode/Android Studio
+
+### Debug commands
+
+```bash
+# Clear all caches (use if Metro is unresponsive)
+npm run web -c
+
+# Check for TypeScript errors
+npx tsc --noEmit
+
+# View npm debug logs
+cat ~/.npm/_logs/*-debug.log
+
+# Kill process on port 8081 (if stuck)
+npx kill-port 8081
+
+# Clear AsyncStorage (web browser console)
+localStorage.clear()
+
+# View app state (React DevTools)
+$r.props.navigation.getState()
+```
+
+### Getting help
+
+1. **Check console first** — Many errors logged with solutions
+2. **Search the code** — Look for similar patterns in existing screens
+3. **Review commit history** — Understand how features were implemented
+4. **Test in isolation** — Disable features to isolate the problem
+5. **Consult dependencies** — Check React Navigation and Expo docs
+
+### Resources
+
+- [React Navigation Docs](https://reactnavigation.org/)
+- [Expo Docs](https://docs.expo.dev/)
+- [React Native Docs](https://reactnative.dev/)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+- [Deep Linking Guide](https://reactnavigation.org/docs/deep-linking/)
 
 ---
 
