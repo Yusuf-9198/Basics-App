@@ -1,16 +1,25 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { Colors, FontSizes, Radius, Spacing } from '../constants/theme';
 
 export function HelpScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.emoji}>💬</Text>
+      <View style={styles.iconCircle}>
+        <Ionicons name="chatbubbles-outline" size={40} color={Colors.primary} />
+      </View>
       <Text style={styles.title}>Help & Support</Text>
       <Text style={styles.subtitle}>
-        Contact support@foodapp.example or visit our FAQ.
+        Email us at support@khana-khazana.com — we typically reply within 24 hours.
       </Text>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Quick tips</Text>
+        <Text style={styles.cardItem}>• Track orders in the Orders tab</Text>
+        <Text style={styles.cardItem}>• Use Search to find cuisines</Text>
+        <Text style={styles.cardItem}>• Swipe open Profile for account menu</Text>
+      </View>
     </View>
   );
 }
@@ -23,10 +32,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: Spacing.lg,
   },
-  emoji: { fontSize: 48, marginBottom: Spacing.md },
+  iconCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
+  },
   title: {
     fontSize: FontSizes.xl,
-    fontWeight: '700',
+    fontWeight: '800',
     color: Colors.text,
     marginBottom: Spacing.sm,
   },
@@ -34,5 +51,26 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
     textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: Spacing.xl,
+  },
+  card: {
+    alignSelf: 'stretch',
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  cardTitle: {
+    fontSize: FontSizes.md,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: Spacing.md,
+  },
+  cardItem: {
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+    lineHeight: 26,
   },
 });

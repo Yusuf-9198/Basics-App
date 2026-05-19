@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,12 +10,15 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { PrimaryButton } from '../components/PrimaryButton';
+import { Colors, FontSizes, Radius, Shadows, Spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
+
+const FORM_MAX_WIDTH = 420;
 
 export function LoginScreen() {
   const { login } = useAuth();
-  const [email, setEmail] = useState('alex@example.com');
+  const [email, setEmail] = useState('ghazi@yusuf.com');
   const [password, setPassword] = useState('password');
   const [loading, setLoading] = useState(false);
 
@@ -30,46 +32,51 @@ export function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.inner}>
-        <Text style={styles.emoji}>🍕</Text>
-        <Text style={styles.title}>Welcome To Khana Khazana</Text>
-        <Text style={styles.subtitle}>Sign in to continue ordering</Text>
+        style={styles.flex}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.header}>
+            <View style={styles.logoWrap}>
+              <Text style={styles.emoji}>🍕</Text>
+            </View>
+            <Text style={styles.title}>Khana Khazana</Text>
+            <Text style={styles.subtitle}>Sign in to continue ordering</Text>
+          </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor={Colors.textSecondary}
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor={Colors.textSecondary}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+          <View style={styles.body}>
+            <View style={styles.formCard}>
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="you@email.com"
+                placeholderTextColor={Colors.textSecondary}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+              />
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="••••••••"
+                placeholderTextColor={Colors.textSecondary}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                autoComplete="password"
+              />
+              <PrimaryButton label="Sign In" onPress={handleLogin} loading={loading} />
+            </View>
 
-        <Pressable
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}>
-          {loading ? (
-            <ActivityIndicator color={Colors.headerText} />
-          ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
-          )}
-        </Pressable>
-
-        <Text style={styles.hint}>
-          Bhai, koi bhi email/password chlega!
-        </Text>
+            <Text style={styles.hint}>The ultimate treasure of deliciousness.</Text>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -80,58 +87,87 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-  inner: {
+  flex: {
     flex: 1,
+  },
+  scroll: {
+    flexGrow: 1,
+  },
+  header: {
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.xxl,
+    paddingHorizontal: Spacing.lg,
+    borderBottomLeftRadius: Radius.xl,
+    borderBottomRightRadius: Radius.xl,
+  },
+  logoWrap: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: Colors.surface,
+    alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadows.card,
   },
   emoji: {
-    fontSize: 56,
-    textAlign: 'center',
-    marginBottom: Spacing.md,
+    fontSize: 44,
   },
   title: {
     fontSize: FontSizes.xxl,
     fontWeight: '800',
-    color: Colors.text,
+    color: Colors.headerText,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
   subtitle: {
     fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+    color: 'rgba(255,255,255,0.92)',
     textAlign: 'center',
-    marginBottom: Spacing.xl,
   },
-  input: {
+  body: {
+    flex: 1,
+    width: '100%',
+    maxWidth: FORM_MAX_WIDTH,
+    alignSelf: 'center',
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.xl,
+  },
+  formCard: {
     backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 10,
-    padding: Spacing.md,
-    fontSize: FontSizes.md,
-    marginBottom: Spacing.md,
-    color: Colors.text,
+    ...Shadows.card,
+    gap: Spacing.xs,
   },
-  button: {
-    backgroundColor: Colors.primary,
-    paddingVertical: Spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
+  label: {
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
+    color: Colors.textSecondary,
     marginTop: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    color: Colors.headerText,
-    fontSize: FontSizes.lg,
-    fontWeight: '700',
+  input: {
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Platform.OS === 'web' ? 12 : Spacing.md,
+    fontSize: FontSizes.md,
+    color: Colors.text,
+    minHeight: 48,
   },
   hint: {
     marginTop: Spacing.lg,
     fontSize: FontSizes.sm,
     color: Colors.textSecondary,
     textAlign: 'center',
+    fontStyle: 'italic',
   },
 });

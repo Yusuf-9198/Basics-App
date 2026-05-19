@@ -1,11 +1,25 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { CompositeNavigationProp } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { RestaurantListCard } from '../components/RestaurantListCard';
+import { ScreenHeader } from '../components/ScreenHeader';
 import { RESTAURANTS } from '../constants/restaurants';
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { Colors, FontSizes, Radius, Spacing } from '../constants/theme';
+import type { HomeStackParamList, TabParamList } from '../types/navigation';
+
+type Nav = CompositeNavigationProp<
+  BottomTabNavigationProp<TabParamList, 'Search'>,
+  StackNavigationProp<HomeStackParamList>
+>;
 
 export function SearchScreen() {
+  const navigation = useNavigation<Nav>();
   const [query, setQuery] = useState('');
   const results = RESTAURANTS.filter(
     (r) =>
@@ -13,31 +27,46 @@ export function SearchScreen() {
       r.cuisine.toLowerCase().includes(query.toLowerCase()),
   );
 
+  const openRestaurant = (id: string, name: string, price: number) => {
+    navigation.navigate('HomeTab', {
+      screen: 'RestaurantDetail',
+      params: { id, name, price },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Text style={styles.title}>Search</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Search restaurants or cuisine..."
-        placeholderTextColor={Colors.textSecondary}
-        value={query}
-        onChangeText={setQuery}
-      />
+      <ScreenHeader title="Search" subtitle="Find food by name or cuisine" />
+
+      <View style={styles.searchWrap}>
+        <Ionicons name="search" size={20} color={Colors.textSecondary} />
+        <TextInput
+          style={styles.input}
+          placeholder="Restaurants, cuisines..."
+          placeholderTextColor={Colors.textSecondary}
+          value={query}
+          onChangeText={setQuery}
+        />
+      </View>
+
       <FlatList
+        style={styles.list}
         data={results}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <Text style={styles.empty}>No restaurants found</Text>
+          <View style={styles.empty}>
+            <Text style={styles.emptyEmoji}>🔍</Text>
+            <Text style={styles.emptyTitle}>No matches</Text>
+            <Text style={styles.emptySubtitle}>Try a different search term</Text>
+          </View>
         }
         renderItem={({ item }) => (
-          <View style={styles.row}>
-            <Text style={styles.emoji}>{item.image}</Text>
-            <View>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.meta}>{item.cuisine}</Text>
-            </View>
-          </View>
+          <RestaurantListCard
+            restaurant={item}
+            onPress={() => openRestaurant(item.id, item.name, item.price)}
+          />
         )}
       />
     </SafeAreaView>
@@ -48,51 +77,50 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
   },
-  title: {
-    fontSize: FontSizes.xl,
-    fontWeight: '800',
-    color: Colors.text,
-    marginBottom: Spacing.md,
-  },
-  input: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 10,
-    padding: Spacing.md,
-    fontSize: FontSizes.md,
-    marginBottom: Spacing.md,
-    color: Colors.text,
-  },
-  list: {
-    gap: Spacing.sm,
-  },
-  row: {
+  searchWrap: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    padding: Spacing.md,
-    borderRadius: 10,
-    marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: Radius.md,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    gap: Spacing.sm,
   },
-  emoji: {
-    fontSize: 32,
-    marginRight: Spacing.md,
-  },
-  name: {
+  input: {
+    flex: 1,
+    paddingVertical: Spacing.md,
     fontSize: FontSizes.md,
-    fontWeight: '600',
     color: Colors.text,
   },
-  meta: {
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingBottom: Spacing.xl,
+    flexGrow: 1,
   },
   empty: {
-    textAlign: 'center',
+    alignItems: 'center',
+    paddingVertical: Spacing.xxl,
+    paddingHorizontal: Spacing.lg,
+  },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: Spacing.md,
+  },
+  emptyTitle: {
+    fontSize: FontSizes.lg,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: Spacing.xs,
+  },
+  emptySubtitle: {
+    fontSize: FontSizes.md,
     color: Colors.textSecondary,
-    marginTop: Spacing.xl,
+    textAlign: 'center',
   },
 });

@@ -1,41 +1,67 @@
 import { CommonActions, useNavigation } from '@react-navigation/native';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import React from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { EmptyState } from '../components/EmptyState';
+import { PrimaryButton } from '../components/PrimaryButton';
+import { getRestaurantById } from '../constants/restaurants';
+import { Colors, FontSizes, Radius, Shadows, Spacing } from '../constants/theme';
 import { useCart } from '../context/CartContext';
-import type { HomeStackParamList } from '../types/navigation';
+import { useOrders } from '../context/OrdersContext';
+import type { HomeStackParamList, TabParamList } from '../types/navigation';
 
-type Nav = StackNavigationProp<HomeStackParamList, 'Cart'>;
+type Nav = CompositeNavigationProp<
+  StackNavigationProp<HomeStackParamList, 'Cart'>,
+  BottomTabNavigationProp<TabParamList>
+>;
 
 export function CartScreen() {
   const navigation = useNavigation<Nav>();
   const { items, total, clearCart } = useCart();
+  const { placeOrder } = useOrders();
+  const [placing, setPlacing] = useState(false);
 
-  const handleCheckout = () => {
-    clearCart();
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'Home' }],
-      }),
-    );
+  const handleCheckout = async () => {
+    if (items.length === 0 || placing) return;
+
+    setPlacing(true);
+    try {
+      await placeOrder(items, total);
+      clearCart();
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
+        }),
+      );
+      navigation.getParent()?.navigate('Orders');
+      setTimeout(
+        () => Alert.alert('Order placed! 🎉', 'Your food is on the way.'),
+        300,
+      );
+    } finally {
+      setPlacing(false);
+    }
   };
 
   if (items.length === 0) {
     return (
-      <View style={styles.empty}>
-        <Text style={styles.emptyEmoji}>🛒</Text>
-        <Text style={styles.emptyText}>Your cart is empty</Text>
-        <Pressable
-          style={styles.linkButton}
-          onPress={() => navigation.replace('Home')}>
-          <Text style={styles.linkText}>replace() → Home</Text>
-        </Pressable>
-        <Pressable style={styles.linkButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.linkText}>goBack()</Text>
-        </Pressable>
+      <View style={styles.emptyWrap}>
+        <EmptyState
+          emoji="🛒"
+          title="Your cart is empty"
+          subtitle="Pick a restaurant and add something delicious"
+        />
+        <View style={styles.emptyActions}>
+          <PrimaryButton
+            label="Browse restaurants"
+            onPress={() => navigation.replace('Home')}
+          />
+          <PrimaryButton label="Go back" variant="outline" onPress={() => navigation.goBack()} />
+        </View>
       </View>
     );
   }
@@ -46,22 +72,29 @@ export function CartScreen() {
         data={items}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <View style={styles.row}>
-            <Text style={styles.itemName}>
-              {item.name} × {item.quantity}
-            </Text>
-            <Text style={styles.itemPrice}>
-              ${(item.price * item.quantity).toFixed(2)}
-            </Text>
-          </View>
-        )}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => {
+          const restaurant = getRestaurantById(item.id);
+          return (
+            <View style={styles.row}>
+              <Text style={styles.rowEmoji}>{restaurant?.image ?? '🍽️'}</Text>
+              <View style={styles.rowBody}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemQty}>Qty: {item.quantity}</Text>
+              </View>
+              <Text style={styles.itemPrice}>
+                ${(item.price * item.quantity).toFixed(2)}
+              </Text>
+            </View>
+          );
+        }}
       />
       <View style={styles.footer}>
-        <Text style={styles.total}>Total: ${total.toFixed(2)}</Text>
-        <Pressable style={styles.button} onPress={handleCheckout}>
-          <Text style={styles.buttonText}>Checkout — reset() to Home</Text>
-        </Pressable>
+        <View style={styles.totalRow}>
+          <Text style={styles.totalLabel}>Total</Text>
+          <Text style={styles.total}>${total.toFixed(2)}</Text>
+        </View>
+        <PrimaryButton label="Place order" onPress={handleCheckout} loading={placing} />
       </View>
     </View>
   );
@@ -74,69 +107,71 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: Spacing.lg,
+    paddingBottom: Spacing.md,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: Colors.surface,
     padding: Spacing.md,
-    borderRadius: 10,
+    borderRadius: Radius.md,
     marginBottom: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadows.card,
+  },
+  rowEmoji: {
+    fontSize: 36,
+    marginRight: Spacing.md,
+  },
+  rowBody: {
+    flex: 1,
   },
   itemName: {
     fontSize: FontSizes.md,
     color: Colors.text,
-    fontWeight: '500',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  itemQty: {
+    fontSize: FontSizes.sm,
+    color: Colors.textSecondary,
   },
   itemPrice: {
-    fontSize: FontSizes.md,
+    fontSize: FontSizes.lg,
     fontWeight: '700',
     color: Colors.primary,
   },
   footer: {
     padding: Spacing.lg,
+    paddingTop: Spacing.md,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
     backgroundColor: Colors.surface,
+    ...Shadows.tabBar,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  totalLabel: {
+    fontSize: FontSizes.md,
+    color: Colors.textSecondary,
+    fontWeight: '500',
   },
   total: {
     fontSize: FontSizes.xl,
     fontWeight: '800',
     color: Colors.text,
-    marginBottom: Spacing.md,
   },
-  button: {
-    backgroundColor: Colors.primary,
-    paddingVertical: Spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: Colors.headerText,
-    fontSize: FontSizes.md,
-    fontWeight: '700',
-  },
-  empty: {
+  emptyWrap: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: Colors.background,
+  },
+  emptyActions: {
     padding: Spacing.lg,
-  },
-  emptyEmoji: {
-    fontSize: 56,
-    marginBottom: Spacing.md,
-  },
-  emptyText: {
-    fontSize: FontSizes.lg,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.lg,
-  },
-  linkButton: {
-    padding: Spacing.md,
-  },
-  linkText: {
-    color: Colors.primary,
-    fontSize: FontSizes.md,
-    fontWeight: '600',
+    gap: Spacing.md,
   },
 });

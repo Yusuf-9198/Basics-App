@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import React from 'react';
 
-import { Colors } from '../constants/theme';
+import { Colors, FontSizes, tabBarStyle } from '../constants/theme';
 import { useCart } from '../context/CartContext';
 import { OrdersScreen } from '../screens/OrdersScreen';
 import { SearchScreen } from '../screens/SearchScreen';
@@ -29,12 +29,12 @@ export function MainTabs() {
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.tabInactive,
-        tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.border,
-          paddingTop: 4,
-          height: 60,
+        tabBarLabelStyle: {
+          fontSize: FontSizes.xs,
+          fontWeight: '600',
+          marginBottom: 4,
         },
+        tabBarStyle,
         tabBarIcon: ({ color, size }) => {
           const icons: Record<keyof TabParamList, keyof typeof Ionicons.glyphMap> = {
             HomeTab: 'home',
@@ -51,7 +51,7 @@ export function MainTabs() {
         options={({ route }) => ({
           title: 'Home',
           tabBarStyle: getTabBarVisibility(route)
-            ? undefined
+            ? tabBarStyle
             : { display: 'none' },
         })}
       />

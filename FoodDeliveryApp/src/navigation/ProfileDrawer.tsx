@@ -1,5 +1,6 @@
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import React from 'react';
+import { Platform } from 'react-native';
 
 import { CustomDrawerContent } from '../components/CustomDrawerContent';
 import { Colors } from '../constants/theme';
@@ -20,6 +21,9 @@ export function ProfileDrawer() {
         headerTintColor: Colors.headerText,
         drawerActiveTintColor: Colors.primary,
         drawerInactiveTintColor: Colors.textSecondary,
+        drawerType: Platform.OS === 'web' ? 'front' : 'slide',
+        swipeEnabled: Platform.OS !== 'web',
+        overlayColor: Platform.OS === 'web' ? 'rgba(0,0,0,0.45)' : undefined,
       }}>
       <Drawer.Screen
         name="Profile"

@@ -1,31 +1,54 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { EmptyState } from '../components/EmptyState';
+import { OrderCard } from '../components/OrderCard';
+import { ScreenHeader } from '../components/ScreenHeader';
+import { Colors, FontSizes, Radius, Spacing } from '../constants/theme';
 import { useCart } from '../context/CartContext';
+import { useOrders } from '../context/OrdersContext';
 
 export function OrdersScreen() {
   const { itemCount } = useCart();
+  const { orders, isLoading } = useOrders();
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Text style={styles.title}>Orders</Text>
+      <ScreenHeader
+        title="Orders"
+        subtitle={orders.length > 0 ? `${orders.length} order${orders.length > 1 ? 's' : ''}` : undefined}
+      />
+
       {itemCount > 0 ? (
-        <View style={styles.badgeCard}>
-          <Text style={styles.badgeEmoji}>🔔</Text>
-          <Text style={styles.badgeText}>
-            Tab badge shows {itemCount} item{itemCount > 1 ? 's' : ''} in cart
+        <View style={styles.banner}>
+          <Text style={styles.bannerEmoji}>🛒</Text>
+          <Text style={styles.bannerText}>
+            {itemCount} in cart — finish checkout to place your order
           </Text>
         </View>
       ) : null}
-      <View style={styles.empty}>
-        <Text style={styles.emptyEmoji}>📦</Text>
-        <Text style={styles.emptyTitle}>No orders yet</Text>
-        <Text style={styles.emptySubtitle}>
-          Your past orders will appear here
-        </Text>
-      </View>
+
+      {isLoading ? (
+        <ActivityIndicator style={styles.loader} color={Colors.primary} size="large" />
+      ) : orders.length === 0 ? (
+        <EmptyState
+          emoji="📦"
+          title="No orders yet"
+          subtitle="Add items from a restaurant, then place your order from the cart"
+        />
+      ) : (
+        <View style={styles.listWrap}>
+          <FlatList
+            style={styles.listFlex}
+            data={orders}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => <OrderCard order={item} />}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -34,48 +57,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
   },
-  title: {
-    fontSize: FontSizes.xl,
-    fontWeight: '800',
-    color: Colors.text,
-    marginBottom: Spacing.md,
-  },
-  badgeCard: {
+  banner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF3C7',
+    backgroundColor: Colors.warningBg,
     padding: Spacing.md,
-    borderRadius: 10,
-    marginBottom: Spacing.lg,
+    borderRadius: Radius.md,
+    marginBottom: Spacing.md,
     gap: Spacing.sm,
   },
-  badgeEmoji: {
-    fontSize: 24,
+  bannerEmoji: {
+    fontSize: 22,
   },
-  badgeText: {
+  bannerText: {
     flex: 1,
     fontSize: FontSizes.sm,
-    color: '#92400E',
+    color: Colors.warningText,
+    fontWeight: '500',
+    lineHeight: 20,
   },
-  empty: {
+  listWrap: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  emptyEmoji: {
-    fontSize: 56,
-    marginBottom: Spacing.md,
+  listFlex: {
+    flex: 1,
   },
-  emptyTitle: {
-    fontSize: FontSizes.lg,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: Spacing.xs,
+  list: {
+    paddingBottom: Spacing.xl,
   },
-  emptySubtitle: {
-    fontSize: FontSizes.md,
-    color: Colors.textSecondary,
+  loader: {
+    marginTop: Spacing.xxl,
   },
 });

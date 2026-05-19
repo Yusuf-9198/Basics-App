@@ -74,27 +74,35 @@ navigation.navigate('RestaurantDetail', {
 
 ## Deep linking
 
-Scheme: `foodapp` (see `app.json`).
+Scheme: `khana-khazana` (see `app.json` → `expo.scheme`).
 
 | URL | Opens |
 |-----|--------|
-| `foodapp://restaurant/123` | Restaurant Detail (Spice Garden) |
-| `foodapp://home` | Home |
-| `foodapp://cart` | Cart |
+| `khana-khazana://restaurant/123` | Restaurant Detail (Spice Garden) |
+| `khana-khazana://home` | Home |
+| `khana-khazana://cart` | Cart |
+| `khana-khazana://search` | Search |
+| `khana-khazana://orders` | Orders |
+| `khana-khazana://profile` | Profile |
+| `khana-khazana://login` | Login (when signed out) |
 
 **Test (authenticated):**
 
 ```bash
 # iOS Simulator
-xcrun simctl openurl booted "foodapp://restaurant/123"
+xcrun simctl openurl booted "khana-khazana://restaurant/123"
 
 # Android Emulator
-adb shell am start -a android.intent.action.VIEW -d "foodapp://restaurant/123"
+adb shell am start -a android.intent.action.VIEW -d "khana-khazana://restaurant/123"
 ```
 
-With Expo Go, use: `npx uri-scheme open foodapp://restaurant/123 --ios`
+With Expo Go / dev build:
 
-> Deep links target the main app stack. Sign in first so the root navigator shows `App` instead of `Auth`.
+```bash
+npx uri-scheme open khana-khazana://restaurant/123 --ios
+```
+
+> If you open a deep link while signed out (e.g. `khana-khazana://restaurant/123`), you’ll land on Login first. After sign-in and onboarding, the app opens the linked screen automatically.
 
 ## Project layout
 
@@ -102,8 +110,8 @@ With Expo Go, use: `npx uri-scheme open foodapp://restaurant/123 --ios`
 src/
   components/     CustomHeader, CustomDrawerContent
   constants/      theme, restaurants mock data
-  context/        AuthContext, CartContext
-  navigation/     Root, Auth, App, Tabs, Home stack, Drawer, linking
+  context/        AuthContext, CartContext, OrdersContext
+  navigation/     Root, Auth, App, Tabs, Home stack, Drawer, linking, deepLink
   screens/        All UI screens
   types/          navigation param lists
 ```

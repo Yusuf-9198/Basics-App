@@ -2,6 +2,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 
 import { CustomHeader } from '../components/CustomHeader';
+import { getRestaurantById } from '../constants/restaurants';
 import { Colors } from '../constants/theme';
 import { CartScreen } from '../screens/CartScreen';
 import { HomeScreen } from '../screens/HomeScreen';
@@ -28,7 +29,10 @@ export function HomeStack() {
         name="RestaurantDetail"
         component={RestaurantDetailScreen}
         options={({ route }) => ({
-          title: route.params.name ?? 'Restaurant',
+          title:
+            route.params.name ??
+            getRestaurantById(route.params.id)?.name ??
+            'Restaurant',
           headerShown: true,
           header: (props) => <CustomHeader {...props} backLabel="Home" />,
         })}

@@ -1,14 +1,21 @@
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { PrimaryButton } from '../components/PrimaryButton';
+import { Colors, FontSizes, Radius, Spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import type { AppStackParamList } from '../types/navigation';
 
 type Nav = StackNavigationProp<AppStackParamList, 'Onboarding'>;
+
+const FEATURES = [
+  { icon: '🍽️', text: 'Browse top restaurants' },
+  { icon: '📦', text: 'Track every order' },
+  { icon: '⚡', text: 'Checkout in seconds' },
+];
 
 export function OnboardingScreen() {
   const navigation = useNavigation<Nav>();
@@ -26,23 +33,31 @@ export function OnboardingScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.hero}>
+        <View style={styles.heroCircle}>
+          <Text style={styles.heroEmoji}>🍽️</Text>
+        </View>
+      </View>
+
       <View style={styles.content}>
-        <Text style={styles.emoji}>🍽️</Text>
         <Text style={styles.title}>Khana Khazana</Text>
         <Text style={styles.subtitle}>
-          Order from your favorite restaurants. Fast delivery, great food.
+          Your favorite meals, delivered warm to your door.
         </Text>
+
         <View style={styles.features}>
-          {['Browse restaurants', 'Track your orders', 'Fast checkout'].map((feature) => (
-            <Text key={feature} style={styles.feature}>
-              ✓ {feature}
-            </Text>
+          {FEATURES.map((feature) => (
+            <View key={feature.text} style={styles.featureRow}>
+              <View style={styles.featureIcon}>
+                <Text style={styles.featureEmoji}>{feature.icon}</Text>
+              </View>
+              <Text style={styles.featureText}>{feature.text}</Text>
+            </View>
           ))}
         </View>
       </View>
-      <Pressable style={styles.button} onPress={handleGetStarted}>
-        <Text style={styles.buttonText}>Get Started</Text>
-      </Pressable>
+
+      <PrimaryButton label="Get Started" onPress={handleGetStarted} style={styles.cta} />
     </SafeAreaView>
   );
 }
@@ -53,19 +68,31 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
     padding: Spacing.lg,
   },
+  hero: {
+    alignItems: 'center',
+    paddingTop: Spacing.xl,
+    paddingBottom: Spacing.lg,
+  },
+  heroCircle: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroEmoji: {
+    fontSize: 72,
+  },
   content: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emoji: {
-    fontSize: 72,
-    marginBottom: Spacing.lg,
   },
   title: {
     fontSize: FontSizes.xxl,
     fontWeight: '800',
     color: Colors.text,
+    textAlign: 'center',
     marginBottom: Spacing.md,
   },
   subtitle: {
@@ -74,26 +101,40 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: Spacing.xl,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
   },
   features: {
-    alignSelf: 'stretch',
-    gap: Spacing.sm,
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.sm,
   },
-  feature: {
+  featureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    gap: Spacing.md,
+  },
+  featureIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  featureEmoji: {
+    fontSize: 22,
+  },
+  featureText: {
+    flex: 1,
     fontSize: FontSizes.md,
     color: Colors.text,
-    paddingVertical: Spacing.xs,
+    fontWeight: '600',
   },
-  button: {
-    backgroundColor: Colors.primary,
-    paddingVertical: Spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: Colors.headerText,
-    fontSize: FontSizes.lg,
-    fontWeight: '700',
+  cta: {
+    marginBottom: Spacing.sm,
   },
 });

@@ -47,8 +47,8 @@ export function CustomHeader({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.header,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(255,255,255,0.2)',
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
   },
   row: {
     flexDirection: 'row',

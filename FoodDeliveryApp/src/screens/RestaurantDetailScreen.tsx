@@ -1,10 +1,11 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { PrimaryButton } from '../components/PrimaryButton';
 import { getRestaurantById } from '../constants/restaurants';
-import { Colors, FontSizes, Spacing } from '../constants/theme';
+import { Colors, FontSizes, Radius, Shadows, Spacing } from '../constants/theme';
 import { useCart } from '../context/CartContext';
 import type { HomeStackParamList } from '../types/navigation';
 
@@ -21,6 +22,8 @@ export function RestaurantDetailScreen() {
   const price = params.price ?? restaurant?.price ?? 0;
   const cuisine = restaurant?.cuisine ?? 'Various';
   const image = restaurant?.image ?? '🍽️';
+  const rating = restaurant?.rating ?? 4.5;
+  const deliveryTime = restaurant?.deliveryTime ?? '25–35 min';
 
   const handleAddToCart = () => {
     addItem({ id: params.id, name, price });
@@ -28,104 +31,119 @@ export function RestaurantDetailScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.emoji}>{image}</Text>
-      <Text style={styles.name}>{name}</Text>
-      <Text style={styles.cuisine}>{cuisine}</Text>
-      <Text style={styles.price}>Starting at ${price.toFixed(2)}</Text>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.infoLabel}>Restaurant ID (deep link param)</Text>
-        <Text style={styles.infoValue}>{params.id}</Text>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}>
+      <View style={styles.heroCard}>
+        <View style={styles.hero}>
+          <Text style={styles.emoji}>{image}</Text>
+        </View>
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.cuisine}>{cuisine}</Text>
+        <View style={styles.statsRow}>
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>★ {rating}</Text>
+            <Text style={styles.statLabel}>Rating</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>{deliveryTime}</Text>
+            <Text style={styles.statLabel}>Delivery</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.stat}>
+            <Text style={styles.statValue}>${price.toFixed(2)}</Text>
+            <Text style={styles.statLabel}>From</Text>
+          </View>
+        </View>
       </View>
 
       <View style={styles.actions}>
-        <Pressable style={styles.secondaryButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.secondaryText}>goBack()</Text>
-        </Pressable>
-        <Pressable style={styles.primaryButton} onPress={handleAddToCart}>
-          <Text style={styles.primaryText}>Add to Cart → navigate()</Text>
-        </Pressable>
+        <PrimaryButton label="Add to Cart" onPress={handleAddToCart} />
+        <PrimaryButton
+          label="Back"
+          variant="outline"
+          onPress={() => navigation.goBack()}
+        />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scroll: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  container: {
     padding: Spacing.lg,
+    paddingBottom: Spacing.xxl,
+  },
+  heroCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.xl,
     alignItems: 'center',
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadows.card,
+  },
+  hero: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    backgroundColor: Colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
   },
   emoji: {
-    fontSize: 80,
-    marginTop: Spacing.lg,
-    marginBottom: Spacing.md,
+    fontSize: 52,
   },
   name: {
     fontSize: FontSizes.xxl,
     fontWeight: '800',
     color: Colors.text,
     marginBottom: Spacing.xs,
+    textAlign: 'center',
   },
   cuisine: {
     fontSize: FontSizes.md,
     color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
-  },
-  price: {
-    fontSize: FontSizes.xl,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: Spacing.xl,
-  },
-  infoBox: {
-    alignSelf: 'stretch',
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
-    padding: Spacing.md,
-    marginBottom: Spacing.xl,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  infoLabel: {
-    fontSize: FontSizes.sm,
-    color: Colors.textSecondary,
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: FontSizes.lg,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  actions: {
-    alignSelf: 'stretch',
-    gap: Spacing.md,
-    marginTop: 'auto',
     marginBottom: Spacing.lg,
   },
-  primaryButton: {
-    backgroundColor: Colors.primary,
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    backgroundColor: Colors.background,
+    borderRadius: Radius.md,
     paddingVertical: Spacing.md,
-    borderRadius: 12,
+  },
+  stat: {
+    flex: 1,
     alignItems: 'center',
   },
-  primaryText: {
-    color: Colors.headerText,
+  statValue: {
     fontSize: FontSizes.md,
     fontWeight: '700',
+    color: Colors.text,
+    marginBottom: 2,
   },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: Colors.primary,
-    paddingVertical: Spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
+  statLabel: {
+    fontSize: FontSizes.xs,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  secondaryText: {
-    color: Colors.primary,
-    fontSize: FontSizes.md,
-    fontWeight: '600',
+  statDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: Colors.border,
+  },
+  actions: {
+    gap: Spacing.md,
   },
 });
